@@ -1,0 +1,4 @@
+.env.sh
+logs/
+target/
+project/target/
