@@ -1,16 +1,16 @@
 package controllers
 
-import com.github.tototoshi.play.social.facebook.{FacebookOAuth2Authenticator, FacebookOAuth2Controller}
-import com.github.tototoshi.play.social.github.{GitHubOAuth2Authenticator, GitHubOAuth2Controller}
-import com.github.tototoshi.play.social.twitter.{TwitterOAuth10aAuthenticator, TwitterOAuth10aController}
+import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2Authenticator, FacebookOAuth2Controller }
+import com.github.tototoshi.play.social.github.{ GitHubOAuth2Authenticator, GitHubOAuth2Controller }
+import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aAuthenticator, TwitterOAuth10aController }
 import jp.t2v.lab.play2.auth._
-import models.{FacebookUser, GitHubUser, TwitterUser, User}
+import models.{ FacebookUser, GitHubUser, TwitterUser, User }
 import play.api.mvc._
 import scalikejdbc.DB
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.{ClassTag, classTag}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.reflect.{ ClassTag, classTag }
 
 object Application extends Controller with OptionalAuthElement with AuthConfigImpl with LoginLogout {
 

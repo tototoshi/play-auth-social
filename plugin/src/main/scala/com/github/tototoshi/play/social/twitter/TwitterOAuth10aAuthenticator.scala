@@ -3,8 +3,8 @@ package com.github.tototoshi.play.social.twitter
 import com.github.tototoshi.play.social.core.OAuth10aAuthenticator
 import play.api.Logger
 import play.api.Play.current
-import play.api.libs.oauth.{ConsumerKey, OAuthCalculator, RequestToken}
-import play.api.libs.ws.{WS, WSResponse}
+import play.api.libs.oauth.{ ConsumerKey, OAuthCalculator, RequestToken }
+import play.api.libs.ws.{ WS, WSResponse }
 
 import scala.concurrent.Future
 

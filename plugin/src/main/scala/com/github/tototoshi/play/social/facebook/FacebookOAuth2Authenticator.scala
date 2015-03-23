@@ -5,8 +5,8 @@ import java.net.URLEncoder
 import com.github.tototoshi.play.social.core.OAuth2Authenticator
 import play.api.Logger
 import play.api.Play.current
-import play.api.http.{HeaderNames, MimeTypes}
-import play.api.libs.ws.{WS, WSResponse}
+import play.api.http.{ HeaderNames, MimeTypes }
+import play.api.libs.ws.{ WS, WSResponse }
 import play.api.mvc.Results
 
 import scala.concurrent.ExecutionContext.Implicits.global

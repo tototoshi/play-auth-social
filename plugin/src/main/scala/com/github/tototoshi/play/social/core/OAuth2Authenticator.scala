@@ -1,7 +1,7 @@
 package com.github.tototoshi.play.social.core
 
 import play.api.libs.ws.WSResponse
-import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.{ RequestHeader, Result }
 
 import scala.concurrent.Future
 
