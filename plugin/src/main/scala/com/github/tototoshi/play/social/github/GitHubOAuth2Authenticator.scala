@@ -2,7 +2,6 @@ package com.github.tototoshi.play.social.github
 
 import java.net.URLEncoder
 
-import com.github.tototoshi.play.json.JsonNaming
 import com.github.tototoshi.play.social.core.{ OAuthProviderAPIException, OAuth2Authenticator }
 import play.api.Logger
 import play.api.Play.current
@@ -24,8 +23,6 @@ case class GitHubUser(
 trait GitHubOAuth2Authenticator extends OAuth2Authenticator {
 
   type ProviderUser = GitHubUser
-
-  implicit val providerUserFormat: Format[ProviderUser] = JsonNaming.snakecase(Json.format[ProviderUser])
 
   val providerName: String = "github"
 

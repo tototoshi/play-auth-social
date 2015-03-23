@@ -19,7 +19,6 @@ object ApplicationBuild extends Build {
         "com.typesafe.play" %% "play" % play.core.PlayVersion.current % "provided",
         "com.typesafe.play" %% "play-ws" % play.core.PlayVersion.current % "provided",
         "com.typesafe.play" %% "play-cache" % play.core.PlayVersion.current % "provided",
-        "com.github.tototoshi" %% "play-json-naming" % "0.1.0",
         "jp.t2v" %% "play2-auth"      % "0.13.2",
         "jp.t2v" %% "play2-auth-test" % "0.13.2" % "test"
       ),

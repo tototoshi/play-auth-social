@@ -2,7 +2,6 @@ package com.github.tototoshi.play.social.facebook
 
 import java.net.URLEncoder
 
-import com.github.tototoshi.play.json.JsonNaming
 import com.github.tototoshi.play.social.core.{ OAuthProviderAPIException, OAuth2Authenticator }
 import play.api.Logger
 import play.api.Play.current

@@ -1,6 +1,5 @@
 package com.github.tototoshi.play.social.twitter
 
-import com.github.tototoshi.play.json.JsonNaming
 import com.github.tototoshi.play.social.core.OAuth10aAuthenticator
 import play.api.Logger
 import play.api.Play.current
