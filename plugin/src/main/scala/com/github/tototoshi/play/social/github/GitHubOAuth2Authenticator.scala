@@ -2,17 +2,15 @@ package com.github.tototoshi.play.social.github
 
 import java.net.URLEncoder
 
-import com.github.tototoshi.play.social.core.{ OAuthProviderAPIException, OAuth2Authenticator }
+import com.github.tototoshi.play.social.core.OAuth2Authenticator
 import play.api.Logger
 import play.api.Play.current
-import play.api.http.{ HeaderNames, MimeTypes }
-import play.api.libs.json.{ Format, Json }
-import play.api.libs.ws.{ WS, WSResponse }
+import play.api.http.{HeaderNames, MimeTypes}
+import play.api.libs.ws.{WS, WSResponse}
 import play.api.mvc.Results
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.control.NonFatal
 
 case class GitHubUser(
   id: Long,

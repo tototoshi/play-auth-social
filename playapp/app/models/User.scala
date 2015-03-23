@@ -1,8 +1,6 @@
 package models
 
-import com.github.tototoshi.play.social.github
-import com.github.tototoshi.play.social.facebook
-import com.github.tototoshi.play.social.twitter
+import com.github.tototoshi.play.social.{facebook, github, twitter}
 import scalikejdbc._
 
 sealed trait Authority

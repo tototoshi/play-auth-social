@@ -1,6 +1,6 @@
 package com.github.tototoshi.play.social.core
 
-import jp.t2v.lab.play2.auth.{ AuthenticityToken, AuthConfig, OptionalAuthElement }
+import jp.t2v.lab.play2.auth.{AuthConfig, AuthenticityToken, OptionalAuthElement}
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._

@@ -1,6 +1,5 @@
 package com.github.tototoshi.play.social.core
 
-import play.api.libs.json.Format
 import play.api.libs.oauth._
 import play.api.libs.ws.WSResponse
 import play.api.mvc._
