@@ -13,7 +13,7 @@ import scala.concurrent.Future
 trait OAuth10aController extends Controller {
   self: OptionalAuthElement with AuthConfig =>
 
-  val authenticator: OAuth10aAuthenticator
+  val authenticator: OAuth10aAuthenticator[User]
 
   def login = AsyncStack { implicit request =>
     loggedIn match {
@@ -51,7 +51,7 @@ trait OAuth10aController extends Controller {
     }
   }
 
-  def authorize = Action.async { implicit request =>
+  def authorize = AsyncStack { implicit request =>
     val form = Form(
       tuple(
         "oauth_token" -> optional(nonEmptyText),
@@ -60,24 +60,14 @@ trait OAuth10aController extends Controller {
       )
     )
 
-    def isLoggedIn(token: AuthenticityToken): Future[Boolean] =
-      idContainer.get(token).map(_.isDefined)
-
     form.bindFromRequest.fold({
       formWithError => Future.successful(BadRequest)
     }, {
       case (Some(oauthToken), Some(oauthVerifier), None) =>
-
-        val action =
-          tokenAccessor.extract(request).map { token =>
-            isLoggedIn(token).map { loggedIn =>
-              if (loggedIn) authenticator.gotoLinkSucceeded(_)
-              else authenticator.gotoLoginSucceeded(_)
-            }
-          }.getOrElse {
-            Future.successful(authenticator.gotoLoginSucceeded _)
-          }
-
+        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
+          case Some(consumerUser) => authenticator.gotoLinkSucceeded(_, consumerUser)
+          case None => authenticator.gotoLoginSucceeded
+        }
         (for {
           tokenSecret <- request.session.get("play.social.requestTokenSecret")
           requestToken = RequestToken(oauthToken, tokenSecret)
@@ -88,8 +78,7 @@ trait OAuth10aController extends Controller {
           for {
             providerUser <- authenticator.retrieveUser(token.token, token.secret)
             _ = Logger.debug("Retrieve user info from oauth provider: " + providerUser.toString)
-            a <- action
-            result <- a(providerUser)
+            result <- action(providerUser)
           } yield {
             result
           }

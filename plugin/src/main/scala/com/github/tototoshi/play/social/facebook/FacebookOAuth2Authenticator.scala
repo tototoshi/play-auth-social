@@ -18,7 +18,7 @@ case class FacebookUser(
   coverUrl: String,
   accessToken: String)
 
-trait FacebookOAuth2Authenticator extends OAuth2Authenticator {
+trait FacebookOAuth2Authenticator[U] extends OAuth2Authenticator[U] {
 
   type ProviderUser = FacebookUser
 

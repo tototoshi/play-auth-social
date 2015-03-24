@@ -17,7 +17,7 @@ case class TwitterUser(
   accessToken: String,
   accessTokenSecret: String)
 
-trait TwitterOAuth10aAuthenticator extends OAuth10aAuthenticator {
+trait TwitterOAuth10aAuthenticator[U] extends OAuth10aAuthenticator[U] {
 
   type ProviderUser = TwitterUser
 

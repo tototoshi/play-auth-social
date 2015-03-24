@@ -5,7 +5,7 @@ import play.api.mvc.{ RequestHeader, Result }
 
 import scala.concurrent.Future
 
-trait OAuth2Authenticator {
+trait OAuth2Authenticator[U] {
 
   type ProviderUser
 
@@ -33,6 +33,6 @@ trait OAuth2Authenticator {
 
   def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
 
-  def gotoLinkSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
+  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: U)(implicit request: RequestHeader): Future[Result]
 
 }
