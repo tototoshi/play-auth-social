@@ -1,21 +1,14 @@
-package com.github.tototoshi.play.social.facebook
+package com.github.tototoshi.play.social.facebook.oauth2
 
 import com.github.tototoshi.play.social.core.OAuth2ProviderUserSupport
 import play.api.Logger
 import play.api.libs.ws.{ WS, WSResponse }
-import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Play.current
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class FacebookUser(
-  id: String,
-  name: String,
-  coverUrl: String,
-  accessToken: String)
-
-trait FacebookOAuth2ProviderUserSupport extends OAuth2ProviderUserSupport {
-  self: FacebookOAuth2Controller =>
+trait FacebookProviderUserSupport extends OAuth2ProviderUserSupport {
+  self: FacebookController =>
 
   type ProviderUser = FacebookUser
 

@@ -1,4 +1,4 @@
-package com.github.tototoshi.play.social.github
+package com.github.tototoshi.play.social.github.oauth2
 
 import java.net.URLEncoder
 
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class GitHubOAuth2Authenticator extends OAuth2Authenticator {
+class GitHubAuthenticator extends OAuth2Authenticator {
 
   type AccessToken = String
 

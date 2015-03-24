@@ -1,19 +1,17 @@
 package controllers
 
-import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2ProviderUserSupport, FacebookOAuth2Controller }
-import com.github.tototoshi.play.social.github.{ GitHubProviderOAuth2UserSupport, GitHubOAuth2Controller }
-import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aProviderUserSupport, TwitterOAuth10aController }
+import com.github.tototoshi.play.social.facebook.oauth2.{ FacebookController, FacebookProviderUserSupport }
+import com.github.tototoshi.play.social.github.oauth2.{ GitHubController, GitHubProviderUserSupport }
+import com.github.tototoshi.play.social.twitter.oauth10a.{ TwitterController, TwitterProviderUserSupport }
 import jp.t2v.lab.play2.auth._
 import models.{ FacebookUser, GitHubUser, TwitterUser, User }
-import play.api.Logger
+import play.api.mvc.Results._
 import play.api.mvc._
 import scalikejdbc.DB
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.reflect.{ ClassTag, classTag }
-
-import play.api.mvc.Results._
 
 object Application extends Controller with OptionalAuthElement with AuthConfigImpl with Logout {
 
@@ -65,9 +63,9 @@ trait AuthConfigImpl extends AuthConfig {
 
 }
 
-object FacebookAuthController extends FacebookOAuth2Controller
+object FacebookAuthController extends FacebookController
     with AuthConfigImpl
-    with FacebookOAuth2ProviderUserSupport {
+    with FacebookProviderUserSupport {
 
   override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
     for {
@@ -101,9 +99,9 @@ object FacebookAuthController extends FacebookOAuth2Controller
   }
 }
 
-object GitHubAuthController extends GitHubOAuth2Controller
+object GitHubAuthController extends GitHubController
     with AuthConfigImpl
-    with GitHubProviderOAuth2UserSupport {
+    with GitHubProviderUserSupport {
 
   override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
     for {
@@ -138,9 +136,9 @@ object GitHubAuthController extends GitHubOAuth2Controller
 
 }
 
-object TwitterAuthController extends TwitterOAuth10aController
+object TwitterAuthController extends TwitterController
     with AuthConfigImpl
-    with TwitterOAuth10aProviderUserSupport {
+    with TwitterProviderUserSupport {
 
   override def gotoLinkSucceeded(accessToken: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
     for {

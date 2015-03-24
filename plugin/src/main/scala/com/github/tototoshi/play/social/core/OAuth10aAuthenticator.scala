@@ -1,10 +1,6 @@
 package com.github.tototoshi.play.social.core
 
 import play.api.libs.oauth._
-import play.api.libs.ws.WSResponse
-import play.api.mvc._
-
-import scala.concurrent.Future
 
 trait OAuth10aAuthenticator {
 

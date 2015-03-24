@@ -1,20 +1,15 @@
-package com.github.tototoshi.play.social.twitter
+package com.github.tototoshi.play.social.twitter.oauth10a
 
 import com.github.tototoshi.play.social.core.OAuth10aProviderUserSupport
 import play.api.Logger
-import play.api.libs.oauth.{ ConsumerKey, OAuthCalculator, RequestToken }
-import play.api.libs.ws.{ WSResponse, WS }
-import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Play.current
+import play.api.libs.oauth.{ ConsumerKey, OAuthCalculator, RequestToken }
+import play.api.libs.ws.{ WS, WSResponse }
 
 import scala.concurrent.Future
 
-case class TwitterOAuth10aAccessToken(
-  token: String,
-  secret: String)
-
-trait TwitterOAuth10aProviderUserSupport extends OAuth10aProviderUserSupport {
-  self: TwitterOAuth10aController =>
+trait TwitterProviderUserSupport extends OAuth10aProviderUserSupport {
+  self: TwitterController =>
 
   type ProviderUser = TwitterUser
 

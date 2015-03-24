@@ -1,6 +1,8 @@
 package models
 
-import com.github.tototoshi.play.social.{ facebook, github, twitter }
+import com.github.tototoshi.play.social.facebook.oauth2
+import com.github.tototoshi.play.social.github
+import com.github.tototoshi.play.social.twitter.oauth10a
 import scalikejdbc._
 
 sealed trait Authority
@@ -72,7 +74,7 @@ object GitHubUser {
     sql"SELECT * FROM github_users WHERE user_id = $userId".map(*).single().apply()
   }
 
-  def save(userId: Long, gitHubUser: github.GitHubUser)(implicit session: DBSession): GitHubUser = {
+  def save(userId: Long, gitHubUser: github.oauth2.GitHubUser)(implicit session: DBSession): GitHubUser = {
     val id = gitHubUser.id
     val login = gitHubUser.login
     val avatarUrl = gitHubUser.avatarUrl
@@ -101,7 +103,7 @@ object FacebookUser {
     sql"SELECT * FROM facebook_users WHERE user_id = $userId".map(*).single().apply()
   }
 
-  def save(userId: Long, facebookUser: facebook.FacebookUser)(implicit session: DBSession): FacebookUser = {
+  def save(userId: Long, facebookUser: oauth2.FacebookUser)(implicit session: DBSession): FacebookUser = {
     val id = facebookUser.id
     val name = facebookUser.name
     val coverUrl = facebookUser.coverUrl
@@ -131,7 +133,7 @@ object TwitterUser {
     sql"SELECT * FROM twitter_users WHERE user_id = $userId".map(*).single().apply()
   }
 
-  def save(userId: Long, twitterUser: twitter.TwitterUser)(implicit session: DBSession): TwitterUser = {
+  def save(userId: Long, twitterUser: oauth10a.TwitterUser)(implicit session: DBSession): TwitterUser = {
     val id = twitterUser.id
     val screenName = twitterUser.screenName
     val profileImageUrl = twitterUser.profileImageUrl

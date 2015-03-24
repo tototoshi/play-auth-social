@@ -1,6 +1,6 @@
 package com.github.tototoshi.play.social.core
 
-import play.api.libs.oauth.{ ConsumerKey, RequestToken }
+import play.api.libs.oauth.ConsumerKey
 
 import scala.concurrent.Future
 
