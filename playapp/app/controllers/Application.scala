@@ -1,7 +1,7 @@
 package controllers
 
-import com.github.tototoshi.play.social.facebook.{ FacebookProviderUserSupport, FacebookOAuth2Controller }
-import com.github.tototoshi.play.social.github.{ GitHubProviderUserSupport, GitHubOAuth2Controller }
+import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2ProviderUserSupport, FacebookOAuth2Controller }
+import com.github.tototoshi.play.social.github.{ GitHubProviderOAuth2UserSupport, GitHubOAuth2Controller }
 import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aProviderUserSupport, TwitterOAuth10aController }
 import jp.t2v.lab.play2.auth._
 import models.{ FacebookUser, GitHubUser, TwitterUser, User }
@@ -67,7 +67,7 @@ trait AuthConfigImpl extends AuthConfig {
 
 object FacebookAuthController extends FacebookOAuth2Controller
     with AuthConfigImpl
-    with FacebookProviderUserSupport {
+    with FacebookOAuth2ProviderUserSupport {
 
   override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
     for {
@@ -103,7 +103,7 @@ object FacebookAuthController extends FacebookOAuth2Controller
 
 object GitHubAuthController extends GitHubOAuth2Controller
     with AuthConfigImpl
-    with GitHubProviderUserSupport {
+    with GitHubProviderOAuth2UserSupport {
 
   override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
     for {

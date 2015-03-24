@@ -13,7 +13,7 @@ case class GitHubUser(
   avatarUrl: String,
   accessToken: String)
 
-trait GitHubProviderUserSupport extends OAuth2ProviderUserSupport {
+trait GitHubProviderOAuth2UserSupport extends OAuth2ProviderUserSupport {
   self: GitHubOAuth2Controller =>
 
   type ProviderUser = GitHubUser
