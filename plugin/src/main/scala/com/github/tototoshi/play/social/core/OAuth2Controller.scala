@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
 
 trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthConfig =>
 
-  val authenticator: OAuth2Authenticator
+  val authenticator: OAuth2Authenticator[User]
 
   val OAUTH2_STATE_KEY = "play.auth.social.oauth2.state"
 
@@ -48,7 +48,7 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
     }
   }
 
-  def authorize = Action.async { implicit request =>
+  def authorize = AsyncStack { implicit request =>
     val form = Form(
       tuple(
         "code" -> nonEmptyText,
@@ -58,29 +58,20 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
       )
     )
 
-    def isLoggedIn(token: AuthenticityToken): Future[Boolean] =
-      idContainer.get(token).map(_.isDefined)
-
     form.bindFromRequest.fold({
       formWithError => Future.successful(BadRequest)
     }, {
       case (code, _) =>
-        val action =
-          tokenAccessor.extract(request).map { token =>
-            isLoggedIn(token).map { loggedIn =>
-              if (loggedIn) authenticator.gotoLinkSucceeded(_)
-              else authenticator.gotoLoginSucceeded(_)
-            }
-          }.getOrElse {
-            Future.successful(authenticator.gotoLoginSucceeded _)
-          }
+        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
+          case Some(consumerUser) => authenticator.gotoLinkSucceeded(_, consumerUser)
+          case None => authenticator.gotoLoginSucceeded
+        }
 
         (for {
           token <- authenticator.retrieveAccessToken(code)
           providerUser <- authenticator.retrieveProviderUser(token)
           _ = Logger.debug("Retrieve user info from oauth provider: " + providerUser.toString)
-          a <- action
-          result <- a(providerUser)
+          result <- action(providerUser)
         } yield result).recover {
           case NonFatal(e) =>
             Logger.error(e.getMessage, e)

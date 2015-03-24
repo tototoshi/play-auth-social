@@ -16,7 +16,7 @@ object Application extends Controller with OptionalAuthElement with AuthConfigIm
 
   def index = StackAction { implicit request =>
     DB.readOnly { implicit session =>
-      val user: Option[Application.User] = loggedIn
+      val user = loggedIn
       val gitHubUser = user.flatMap(u => GitHubUser.findByUserId(u.id))
       val facebookUser = user.flatMap(u => FacebookUser.findByUserId(u.id))
       val twitterUser = user.flatMap(u => TwitterUser.findByUserId(u.id))
@@ -68,23 +68,13 @@ trait AuthConfigImpl extends AuthConfig {
 
 object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigImpl {
   self =>
-  lazy val authenticator = new FacebookOAuth2Authenticator {
-    override def gotoLinkSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
-      tokenAccessor.extract(request) match {
-        case None => Future.successful(Unauthorized)
-        case Some(token) =>
-          for {
-            id <- idContainer.get(token)
-          } yield {
-            id.map { i =>
-              DB.localTx { implicit session =>
-                FacebookUser.save(i, providerUser)
-                Redirect(routes.Application.index)
-              }
-            }.getOrElse {
-              Unauthorized
-            }
-          }
+  lazy val authenticator = new FacebookOAuth2Authenticator[User] {
+    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+      Future.successful {
+        DB.localTx { implicit session =>
+          FacebookUser.save(consumerUser.id, providerUser)
+          Redirect(routes.Application.index)
+        }
       }
     }
 
@@ -106,23 +96,13 @@ object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigIm
 object GitHubAuthController extends GitHubOAuth2Controller with AuthConfigImpl {
   self =>
 
-  lazy val authenticator = new GitHubOAuth2Authenticator {
-    override def gotoLinkSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
-      tokenAccessor.extract(request) match {
-        case None => Future.successful(Unauthorized)
-        case Some(token) =>
-          for {
-            id <- idContainer.get(token)
-          } yield {
-            id.map { i =>
-              DB.localTx { implicit session =>
-                GitHubUser.save(i, providerUser)
-                Redirect(routes.Application.index)
-              }
-            }.getOrElse {
-              Unauthorized
-            }
-          }
+  lazy val authenticator = new GitHubOAuth2Authenticator[User] {
+    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+      Future.successful {
+        DB.localTx { implicit session =>
+          GitHubUser.save(consumerUser.id, providerUser)
+          Redirect(routes.Application.index)
+        }
       }
     }
 
@@ -143,23 +123,13 @@ object GitHubAuthController extends GitHubOAuth2Controller with AuthConfigImpl {
 
 object TwitterAuthController extends TwitterOAuth10aController with AuthConfigImpl {
   self =>
-  lazy val authenticator = new TwitterOAuth10aAuthenticator {
-    override def gotoLinkSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
-      tokenAccessor.extract(request) match {
-        case None => Future.successful(Unauthorized)
-        case Some(token) =>
-          for {
-            id <- idContainer.get(token)
-          } yield {
-            id.map { i =>
-              DB.localTx { implicit session =>
-                TwitterUser.save(i, providerUser)
-                Redirect(routes.Application.index)
-              }
-            }.getOrElse {
-              Unauthorized
-            }
-          }
+  lazy val authenticator = new TwitterOAuth10aAuthenticator[User] {
+    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+      Future.successful {
+        DB.localTx { implicit session =>
+          TwitterUser.save(consumerUser.id, providerUser)
+          Redirect(routes.Application.index)
+        }
       }
     }
 
