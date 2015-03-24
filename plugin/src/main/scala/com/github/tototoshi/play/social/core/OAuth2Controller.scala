@@ -20,6 +20,8 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
 
   val OAUTH2_STATE_KEY = "play.auth.social.oauth2.state"
 
+  // TODO scope is optional in some services
+  // TODO some services have more optional parameter
   def login(scope: String) = AsyncStack { implicit request =>
     loggedIn match {
       case Some(u) =>
@@ -35,6 +37,8 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
     }
   }
 
+  // TODO scope is optional in some services
+  // TODO some services have more optional parameter
   def link(scope: String) = AsyncStack { implicit request =>
     loggedIn match {
       case Some(u) =>

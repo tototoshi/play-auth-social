@@ -2,9 +2,10 @@ package controllers
 
 import com.github.tototoshi.play.social.facebook.oauth2.{ FacebookController, FacebookProviderUserSupport }
 import com.github.tototoshi.play.social.github.oauth2.{ GitHubController, GitHubProviderUserSupport }
+import com.github.tototoshi.play.social.slack.oauth2.SlackController
 import com.github.tototoshi.play.social.twitter.oauth10a.{ TwitterController, TwitterProviderUserSupport }
 import jp.t2v.lab.play2.auth._
-import models.{ FacebookUser, GitHubUser, TwitterUser, User }
+import models._
 import play.api.mvc.Results._
 import play.api.mvc._
 import scalikejdbc.DB
@@ -21,7 +22,8 @@ object Application extends Controller with OptionalAuthElement with AuthConfigIm
       val gitHubUser = user.flatMap(u => GitHubUser.findByUserId(u.id))
       val facebookUser = user.flatMap(u => FacebookUser.findByUserId(u.id))
       val twitterUser = user.flatMap(u => TwitterUser.findByUserId(u.id))
-      Ok(views.html.index(user, gitHubUser, facebookUser, twitterUser))
+      val slackAccessToken = user.flatMap(u => SlackAccessToken.findByUserId(u.id))
+      Ok(views.html.index(user, gitHubUser, facebookUser, twitterUser, slackAccessToken))
     }
   }
 
@@ -169,6 +171,24 @@ object TwitterAuthController extends TwitterController
       providerUser <- retrieveProviderUser(authenticator.consumerKey, accessToken)
       result <- gotoLoginSucceeded(providerUser)
     } yield result
+  }
+
+}
+
+object SlackAuthController extends SlackController
+    with AuthConfigImpl {
+
+  override def gotoLinkSucceeded(accessToken: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    Future.successful {
+      DB.localTx { implicit session =>
+        SlackAccessToken.save(consumerUser.id, accessToken)
+        Redirect(routes.Application.index)
+      }
+    }
+  }
+
+  override def gotoLoginSucceeded(accessToken: AccessToken)(implicit request: RequestHeader): Future[Result] = {
+    ???
   }
 
 }

@@ -33,6 +33,9 @@ case class TwitterUser(
   accessToken: String,
   accessTokenSecret: String)
 
+case class SlackAccessToken(
+  userId: Long,
+  accessToken: String)
 object User {
 
   def *(rs: WrappedResultSet) = User(
@@ -146,3 +149,21 @@ object TwitterUser {
 
 }
 
+object SlackAccessToken {
+
+  def *(rs: WrappedResultSet) = SlackAccessToken(
+    rs.long("user_id"),
+    rs.string("access_token")
+  )
+
+  def findByUserId(userId: Long)(implicit session: DBSession): Option[SlackAccessToken] = {
+    sql"SELECT * FROM slack_access_token WHERE user_id = $userId".map(*).single().apply()
+  }
+
+  def save(userId: Long, accessToken: String)(implicit session: DBSession): SlackAccessToken = {
+    sql"""INSERT INTO slack_access_token(user_id, access_token)
+          VALUES ($userId, $accessToken)""".update.apply()
+    SlackAccessToken(userId, accessToken)
+  }
+
+}

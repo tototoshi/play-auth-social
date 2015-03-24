@@ -1,4 +1,8 @@
-@(login: Option[User], gitHubUser: Option[GitHubUser], facebookUser: Option[FacebookUser], twitterUser: Option[TwitterUser])
+@(login: Option[User],
+  gitHubUser: Option[GitHubUser],
+  facebookUser: Option[FacebookUser],
+  twitterUser: Option[TwitterUser],
+  slackAccessToken: Option[SlackAccessToken])
 
 <html>
     <head>
@@ -72,14 +76,25 @@
                     <div class="provider">
                         <h2>Twitter</h2>
                         @twitterUser.map { u =>
-                            <p>
-                                @u.screenName
-                            </p>
-                            <p>
-                                <img src="@{u.profileImageUrl}">
-                            </p>
+                        <p>
+                            @u.screenName
+                        </p>
+                        <p>
+                            <img src="@{u.profileImageUrl}">
+                        </p>
                         }.getOrElse {
                             <a href="@routes.TwitterAuthController.link()">link Twitter</a>
+                        }
+                    </div>
+
+                    <div class="provider">
+                        <h2>Slack</h2>
+                        @slackAccessToken.map { u =>
+                        <p>
+                            @u.accessToken
+                        </p>
+                        }.getOrElse {
+                            <a href="@routes.SlackAuthController.link("read")">link Slack</a>
                         }
                     </div>
 

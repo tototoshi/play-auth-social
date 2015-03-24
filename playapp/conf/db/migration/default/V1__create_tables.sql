@@ -28,3 +28,8 @@ CREATE TABLE facebook_users (
   cover_url VARCHAR(1000) NOT NULL,
   access_token VARCHAR(1000) NOT NULL
 );
+
+CREATE TABLE slack_access_token (
+  user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+  access_token VARCHAR(1000) NOT NULL
+);
