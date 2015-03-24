@@ -1,6 +1,6 @@
 package com.github.tototoshi.play.social.core
 
-import jp.t2v.lab.play2.auth.{ AuthConfig, AuthenticityToken, OptionalAuthElement }
+import jp.t2v.lab.play2.auth.{ AuthConfig, OptionalAuthElement }
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -13,7 +13,9 @@ import scala.concurrent.Future
 trait OAuth10aController extends Controller {
   self: OptionalAuthElement with AuthConfig =>
 
-  val authenticator: OAuth10aAuthenticator[User]
+  val authenticator: OAuth10aAuthenticator
+
+  type ProviderUser = authenticator.ProviderUser
 
   def login = AsyncStack { implicit request =>
     loggedIn match {
@@ -64,9 +66,9 @@ trait OAuth10aController extends Controller {
       formWithError => Future.successful(BadRequest)
     }, {
       case (Some(oauthToken), Some(oauthVerifier), None) =>
-        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
-          case Some(consumerUser) => authenticator.gotoLinkSucceeded(_, consumerUser)
-          case None => authenticator.gotoLoginSucceeded
+        val action: ProviderUser => Future[Result] = loggedIn match {
+          case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
+          case None => gotoLoginSucceeded
         }
         (for {
           tokenSecret <- request.session.get("play.social.requestTokenSecret")
@@ -89,6 +91,10 @@ trait OAuth10aController extends Controller {
     })
 
   }
+
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
+
+  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }
 

@@ -1,8 +1,8 @@
 package controllers
 
-import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2Authenticator, FacebookOAuth2Controller }
-import com.github.tototoshi.play.social.github.{ GitHubOAuth2Authenticator, GitHubOAuth2Controller }
-import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aAuthenticator, TwitterOAuth10aController }
+import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2Controller }
+import com.github.tototoshi.play.social.github.{ GitHubOAuth2Controller }
+import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aController }
 import jp.t2v.lab.play2.auth._
 import models.{ FacebookUser, GitHubUser, TwitterUser, User }
 import play.api.mvc._
@@ -67,83 +67,78 @@ trait AuthConfigImpl extends AuthConfig {
 }
 
 object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigImpl {
-  self =>
-  lazy val authenticator = new FacebookOAuth2Authenticator[User] {
-    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-      Future.successful {
-        DB.localTx { implicit session =>
-          FacebookUser.save(consumerUser.id, providerUser)
-          Redirect(routes.Application.index)
-        }
+
+  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    Future.successful {
+      DB.localTx { implicit session =>
+        FacebookUser.save(consumerUser.id, providerUser)
+        Redirect(routes.Application.index)
       }
     }
+  }
 
-    override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
-      DB.localTx { implicit session =>
-        FacebookUser.findById(providerUser.id) match {
-          case None =>
-            val id = User.create(providerUser.name, providerUser.coverUrl).id
-            FacebookUser.save(id, providerUser)
-            self.gotoLoginSucceeded(id)
-          case Some(fu) =>
-            self.gotoLoginSucceeded(fu.userId)
-        }
+  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+    DB.localTx { implicit session =>
+      FacebookUser.findById(providerUser.id) match {
+        case None =>
+          val id = User.create(providerUser.name, providerUser.coverUrl).id
+          FacebookUser.save(id, providerUser)
+          gotoLoginSucceeded(id)
+        case Some(fu) =>
+          gotoLoginSucceeded(fu.userId)
       }
     }
   }
 }
 
 object GitHubAuthController extends GitHubOAuth2Controller with AuthConfigImpl {
-  self =>
 
-  lazy val authenticator = new GitHubOAuth2Authenticator[User] {
-    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-      Future.successful {
-        DB.localTx { implicit session =>
-          GitHubUser.save(consumerUser.id, providerUser)
-          Redirect(routes.Application.index)
-        }
-      }
-    }
-
-    override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    Future.successful {
       DB.localTx { implicit session =>
-        GitHubUser.findById(providerUser.id) match {
-          case None =>
-            val id = User.create(providerUser.login, providerUser.avatarUrl).id
-            GitHubUser.save(id, providerUser)
-            self.gotoLoginSucceeded(id)
-          case Some(gu) =>
-            self.gotoLoginSucceeded(gu.userId)
-        }
+        GitHubUser.save(consumerUser.id, providerUser)
+        Redirect(routes.Application.index)
       }
     }
   }
+
+  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+    DB.localTx { implicit session =>
+      GitHubUser.findById(providerUser.id) match {
+        case None =>
+          val id = User.create(providerUser.login, providerUser.avatarUrl).id
+          GitHubUser.save(id, providerUser)
+          gotoLoginSucceeded(id)
+        case Some(gu) =>
+          gotoLoginSucceeded(gu.userId)
+      }
+    }
+  }
+
 }
 
 object TwitterAuthController extends TwitterOAuth10aController with AuthConfigImpl {
-  self =>
-  lazy val authenticator = new TwitterOAuth10aAuthenticator[User] {
-    override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-      Future.successful {
-        DB.localTx { implicit session =>
-          TwitterUser.save(consumerUser.id, providerUser)
-          Redirect(routes.Application.index)
-        }
-      }
-    }
 
-    override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    Future.successful {
       DB.localTx { implicit session =>
-        TwitterUser.findById(providerUser.id) match {
-          case None =>
-            val id = User.create(providerUser.screenName, providerUser.profileImageUrl).id
-            TwitterUser.save(id, providerUser)
-            self.gotoLoginSucceeded(id)
-          case Some(tu) =>
-            self.gotoLoginSucceeded(tu.userId)
-        }
+        TwitterUser.save(consumerUser.id, providerUser)
+        Redirect(routes.Application.index)
       }
     }
   }
+
+  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+    DB.localTx { implicit session =>
+      TwitterUser.findById(providerUser.id) match {
+        case None =>
+          val id = User.create(providerUser.screenName, providerUser.profileImageUrl).id
+          TwitterUser.save(id, providerUser)
+          gotoLoginSucceeded(id)
+        case Some(tu) =>
+          gotoLoginSucceeded(tu.userId)
+      }
+    }
+  }
+
 }

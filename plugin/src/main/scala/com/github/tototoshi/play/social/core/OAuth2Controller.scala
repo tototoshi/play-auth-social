@@ -14,7 +14,9 @@ import scala.util.control.NonFatal
 
 trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthConfig =>
 
-  val authenticator: OAuth2Authenticator[User]
+  val authenticator: OAuth2Authenticator
+
+  type ProviderUser = authenticator.ProviderUser
 
   val OAUTH2_STATE_KEY = "play.auth.social.oauth2.state"
 
@@ -62,9 +64,9 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
       formWithError => Future.successful(BadRequest)
     }, {
       case (code, _) =>
-        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
-          case Some(consumerUser) => authenticator.gotoLinkSucceeded(_, consumerUser)
-          case None => authenticator.gotoLoginSucceeded
+        val action: ProviderUser => Future[Result] = loggedIn match {
+          case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
+          case None => gotoLoginSucceeded
         }
 
         (for {
@@ -79,4 +81,9 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
         }
     })
   }
+
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
+
+  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
+
 }
