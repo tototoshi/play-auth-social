@@ -12,7 +12,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.reflect.{ ClassTag, classTag }
 
-object Application extends Controller with OptionalAuthElement with AuthConfigImpl with LoginLogout {
+import play.api.mvc.Results._
+
+object Application extends Controller with OptionalAuthElement with AuthConfigImpl with Logout {
 
   def index = StackAction { implicit request =>
     DB.readOnly { implicit session =>
@@ -31,10 +33,6 @@ object Application extends Controller with OptionalAuthElement with AuthConfigIm
 }
 
 trait AuthConfigImpl extends AuthConfig {
-  self: Login =>
-
-  import play.api.mvc.Results._
-
   type Id = Long
   type User = models.User
   type Authority = models.Authority
