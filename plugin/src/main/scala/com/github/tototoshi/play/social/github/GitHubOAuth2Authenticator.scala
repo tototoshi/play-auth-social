@@ -2,7 +2,7 @@ package com.github.tototoshi.play.social.github
 
 import java.net.URLEncoder
 
-import com.github.tototoshi.play.social.core.OAuth2Authenticator
+import com.github.tototoshi.play.social.core.{ AccessTokenRetrievalFailedException, OAuth2Authenticator }
 import play.api.Logger
 import play.api.Play.current
 import play.api.http.{ HeaderNames, MimeTypes }
@@ -11,6 +11,7 @@ import play.api.mvc.Results
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class GitHubUser(
   id: Long,
@@ -58,7 +59,12 @@ class GitHubOAuth2Authenticator extends OAuth2Authenticator {
 
   def parseAccessTokenResponse(response: WSResponse): String = {
     Logger(getClass).debug("Parsing access token response: " + response.body)
-    (response.json \ "access_token").as[String]
+    try {
+      (response.json \ "access_token").as[String]
+    } catch {
+      case NonFatal(e) =>
+        throw new AccessTokenRetrievalFailedException(s"Failed to parse access token: ${response.body}", e)
+    }
   }
 
   def readProviderUser(accessToken: String, response: WSResponse): ProviderUser = {

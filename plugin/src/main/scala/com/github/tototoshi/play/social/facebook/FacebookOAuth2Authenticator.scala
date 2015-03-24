@@ -2,7 +2,7 @@ package com.github.tototoshi.play.social.facebook
 
 import java.net.URLEncoder
 
-import com.github.tototoshi.play.social.core.OAuth2Authenticator
+import com.github.tototoshi.play.social.core.{ AccessTokenRetrievalFailedException, OAuth2Authenticator }
 import play.api.Logger
 import play.api.Play.current
 import play.api.http.{ HeaderNames, MimeTypes }
@@ -11,6 +11,7 @@ import play.api.mvc.Results
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class FacebookUser(
   id: String,
@@ -59,13 +60,21 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
 
   def parseAccessTokenResponse(response: WSResponse): String = {
     Logger(getClass).debug("Parsing access token response: " + response.body)
-    (for {
-      params <- response.body.split("&").toList
-      key :: value :: Nil = params.split("=").toList
-      if key == "access_token"
-    } yield {
-      value
-    }).headOption.getOrElse("Error") // TODO
+    try {
+      (for {
+        params <- response.body.split("&").toList
+        key :: value :: Nil = params.split("=").toList
+        if key == "access_token"
+      } yield {
+        value
+      }).headOption.getOrElse {
+        throw new AccessTokenRetrievalFailedException(s"Failed to parse access token: ${response.body}")
+      }
+    } catch {
+      case NonFatal(e) =>
+        throw new AccessTokenRetrievalFailedException(s"Failed to retrieve access token. ${response.body}", e)
+    }
+
   }
 
   def readProviderUser(accessToken: String, response: WSResponse): ProviderUser = {
