@@ -16,7 +16,7 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
 
   val authenticator: OAuth2Authenticator
 
-  type ProviderUser = authenticator.ProviderUser
+  type AccessToken = authenticator.AccessToken
 
   val OAUTH2_STATE_KEY = "play.auth.social.oauth2.state"
 
@@ -64,16 +64,14 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
       formWithError => Future.successful(BadRequest)
     }, {
       case (code, _) =>
-        val action: ProviderUser => Future[Result] = loggedIn match {
+        val action: AccessToken => Future[Result] = loggedIn match {
           case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
           case None => gotoLoginSucceeded
         }
 
         (for {
           token <- authenticator.retrieveAccessToken(code)
-          providerUser <- authenticator.retrieveProviderUser(token)
-          _ = Logger(getClass).debug("Retrieve user info from oauth provider: " + providerUser.toString)
-          result <- action(providerUser)
+          result <- action(token)
         } yield result).recover {
           case NonFatal(e) =>
             Logger(getClass).error(e.getMessage, e)
@@ -82,8 +80,8 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
     })
   }
 
-  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
+  def gotoLoginSucceeded(token: AccessToken)(implicit request: RequestHeader): Future[Result]
 
-  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
+  def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }

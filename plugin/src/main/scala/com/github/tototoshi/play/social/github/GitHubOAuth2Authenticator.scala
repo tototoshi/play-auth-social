@@ -13,15 +13,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-case class GitHubUser(
-  id: Long,
-  login: String,
-  avatarUrl: String,
-  accessToken: String)
-
 class GitHubOAuth2Authenticator extends OAuth2Authenticator {
 
-  type ProviderUser = GitHubUser
+  type AccessToken = String
 
   val providerName: String = "github"
 
@@ -35,7 +29,7 @@ class GitHubOAuth2Authenticator extends OAuth2Authenticator {
 
   lazy val callbackUrl = current.configuration.getString("github.callbackURL").getOrElse(sys.error("github.callbackURL is missing"))
 
-  def retrieveAccessToken(code: String): Future[String] = {
+  def retrieveAccessToken(code: String): Future[AccessToken] = {
     WS.url(accessTokenUrl)
       .withQueryString(
         "client_id" -> clientId,
@@ -64,24 +58,6 @@ class GitHubOAuth2Authenticator extends OAuth2Authenticator {
     } catch {
       case NonFatal(e) =>
         throw new AccessTokenRetrievalFailedException(s"Failed to parse access token: ${response.body}", e)
-    }
-  }
-
-  def readProviderUser(accessToken: String, response: WSResponse): ProviderUser = {
-    val j = response.json
-    GitHubUser(
-      (j \ "id").as[Long],
-      (j \ "login").as[String],
-      (j \ "avatar_url").as[String],
-      accessToken
-    )
-  }
-
-  def retrieveProviderUser(accessToken: String): Future[ProviderUser] = {
-    for {
-      response <- WS.url("https://api.github.com/user").withHeaders("Authorization" -> s"token ${accessToken}").get()
-    } yield {
-      readProviderUser(accessToken, response)
     }
   }
 

@@ -13,15 +13,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-case class FacebookUser(
-  id: String,
-  name: String,
-  coverUrl: String,
-  accessToken: String)
-
 class FacebookOAuth2Authenticator extends OAuth2Authenticator {
 
-  type ProviderUser = FacebookUser
+  type AccessToken = String
 
   val providerName: String = "facebook"
 
@@ -35,7 +29,7 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
 
   lazy val callbackUrl = current.configuration.getString("facebook.callbackURL").getOrElse(sys.error("facebook.callbackURL is missing"))
 
-  def retrieveAccessToken(code: String): Future[String] = {
+  def retrieveAccessToken(code: String): Future[AccessToken] = {
     WS.url(accessTokenUrl)
       .withQueryString(
         "client_id" -> clientId,
@@ -75,27 +69,6 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
         throw new AccessTokenRetrievalFailedException(s"Failed to retrieve access token. ${response.body}", e)
     }
 
-  }
-
-  def readProviderUser(accessToken: String, response: WSResponse): ProviderUser = {
-    val j = response.json
-    FacebookUser(
-      (j \ "id").as[String],
-      (j \ "name").as[String],
-      (j \ "picture" \ "data" \ "url").as[String],
-      accessToken
-    )
-  }
-
-  def retrieveProviderUser(accessToken: String): Future[ProviderUser] = {
-    for {
-      response <- WS.url("https://graph.facebook.com/me")
-        .withQueryString("access_token" -> accessToken, "fields" -> "name,first_name,last_name,picture.type(large),email")
-        .get()
-    } yield {
-      Logger(getClass).debug("Retrieving user info from provider API: " + response.body)
-      readProviderUser(accessToken, response)
-    }
   }
 
 }

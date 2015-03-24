@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 trait OAuth10aAuthenticator {
 
-  type ProviderUser
+  type AccessToken
 
   val callbackURL: String
 
@@ -28,10 +28,6 @@ trait OAuth10aAuthenticator {
   )
 
   lazy val oauth = OAuth(serviceInfo, use10a = true)
-
-  protected def readProviderUser(accessToken: String, accessTokenSecret: String, response: WSResponse): ProviderUser
-
-  def retrieveUser(accessToken: String, accessTokenSecret: String): Future[ProviderUser]
 
 }
 

@@ -6,7 +6,7 @@ import scala.concurrent.Future
 
 trait OAuth2Authenticator {
 
-  type ProviderUser
+  type AccessToken
 
   val providerName: String
 
@@ -20,14 +20,10 @@ trait OAuth2Authenticator {
 
   val clientSecret: String
 
-  def retrieveAccessToken(code: String): Future[String]
+  def retrieveAccessToken(code: String): Future[AccessToken]
 
   def getAuthorizationUrl(scope: String, state: String): String
 
   def parseAccessTokenResponse(response: WSResponse): String
-
-  protected def readProviderUser(accessToken: String, response: WSResponse): ProviderUser
-
-  def retrieveProviderUser(accessToken: String): Future[ProviderUser]
 
 }

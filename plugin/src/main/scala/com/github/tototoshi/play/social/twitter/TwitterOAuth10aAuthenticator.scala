@@ -19,7 +19,7 @@ case class TwitterUser(
 
 class TwitterOAuth10aAuthenticator extends OAuth10aAuthenticator {
 
-  type ProviderUser = TwitterUser
+  type AccessToken = TwitterOAuth10aAccessToken
 
   val providerName: String = "twitter"
 
@@ -37,30 +37,6 @@ class TwitterOAuth10aAuthenticator extends OAuth10aAuthenticator {
   lazy val callbackURL = current.configuration.getString("twitter.callbackURL").getOrElse(
     sys.error("twitter.callbackURL is missing")
   )
-
-  def readProviderUser(accessToken: String, accessTokenSecret: String, response: WSResponse): ProviderUser = {
-    val j = response.json
-    TwitterUser(
-      (j \ "id").as[Long],
-      (j \ "screen_name").as[String],
-      (j \ "name").as[String],
-      (j \ "description").as[String],
-      (j \ "profile_image_url").as[String],
-      accessToken,
-      accessTokenSecret
-    )
-  }
-
-  def retrieveUser(accessToken: String, accessTokenSecret: String): Future[ProviderUser] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    for {
-      response <- WS.url("https://api.twitter.com/1.1/account/verify_credentials.json")
-        .sign(OAuthCalculator(consumerKey, RequestToken(accessToken, accessTokenSecret))).get()
-    } yield {
-      Logger(getClass).debug("Retrieving user info from Twitter API: " + response.body)
-      readProviderUser(accessToken, accessTokenSecret, response)
-    }
-  }
 
 }
 

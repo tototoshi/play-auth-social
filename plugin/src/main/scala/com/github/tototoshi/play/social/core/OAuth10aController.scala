@@ -15,7 +15,7 @@ trait OAuth10aController extends Controller {
 
   val authenticator: OAuth10aAuthenticator
 
-  type ProviderUser = authenticator.ProviderUser
+  type AccessToken = authenticator.AccessToken
 
   def login = AsyncStack { implicit request =>
     loggedIn match {
@@ -66,7 +66,7 @@ trait OAuth10aController extends Controller {
       formWithError => Future.successful(BadRequest)
     }, {
       case (Some(oauthToken), Some(oauthVerifier), None) =>
-        val action: ProviderUser => Future[Result] = loggedIn match {
+        val action: AccessToken => Future[Result] = loggedIn match {
           case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
           case None => gotoLoginSucceeded
         }
@@ -77,13 +77,7 @@ trait OAuth10aController extends Controller {
             requestToken, oauthVerifier
           ).right.toOption
         } yield {
-          for {
-            providerUser <- authenticator.retrieveUser(token.token, token.secret)
-            _ = Logger(getClass).debug("Retrieve user info from oauth provider: " + providerUser.toString)
-            result <- action(providerUser)
-          } yield {
-            result
-          }
+          action(requestTokenToAccessToken(token))
         }).getOrElse(Future.successful(BadRequest))
 
       case (None, None, Some(denied)) => Future.successful(Unauthorized)
@@ -92,9 +86,11 @@ trait OAuth10aController extends Controller {
 
   }
 
-  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
+  def requestTokenToAccessToken(requestToken: RequestToken): AccessToken
 
-  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
+  def gotoLoginSucceeded(accessToken: AccessToken)(implicit request: RequestHeader): Future[Result]
+
+  def gotoLinkSucceeded(accessToken: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }
 

@@ -1,10 +1,11 @@
 package controllers
 
-import com.github.tototoshi.play.social.facebook.{ FacebookOAuth2Controller }
-import com.github.tototoshi.play.social.github.{ GitHubOAuth2Controller }
-import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aController }
+import com.github.tototoshi.play.social.facebook.{ FacebookProviderUserSupport, FacebookOAuth2Controller }
+import com.github.tototoshi.play.social.github.{ GitHubProviderUserSupport, GitHubOAuth2Controller }
+import com.github.tototoshi.play.social.twitter.{ TwitterOAuth10aProviderUserSupport, TwitterOAuth10aController }
 import jp.t2v.lab.play2.auth._
 import models.{ FacebookUser, GitHubUser, TwitterUser, User }
+import play.api.Logger
 import play.api.mvc._
 import scalikejdbc.DB
 
@@ -64,10 +65,14 @@ trait AuthConfigImpl extends AuthConfig {
 
 }
 
-object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigImpl {
+object FacebookAuthController extends FacebookOAuth2Controller
+    with AuthConfigImpl
+    with FacebookProviderUserSupport {
 
-  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-    Future.successful {
+  override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(token)
+    } yield {
       DB.localTx { implicit session =>
         FacebookUser.save(consumerUser.id, providerUser)
         Redirect(routes.Application.index)
@@ -75,7 +80,7 @@ object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigIm
     }
   }
 
-  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
     DB.localTx { implicit session =>
       FacebookUser.findById(providerUser.id) match {
         case None =>
@@ -87,12 +92,23 @@ object FacebookAuthController extends FacebookOAuth2Controller with AuthConfigIm
       }
     }
   }
+
+  override def gotoLoginSucceeded(token: AccessToken)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(token)
+      result <- gotoLoginSucceeded(providerUser)
+    } yield result
+  }
 }
 
-object GitHubAuthController extends GitHubOAuth2Controller with AuthConfigImpl {
+object GitHubAuthController extends GitHubOAuth2Controller
+    with AuthConfigImpl
+    with GitHubProviderUserSupport {
 
-  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-    Future.successful {
+  override def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(token)
+    } yield {
       DB.localTx { implicit session =>
         GitHubUser.save(consumerUser.id, providerUser)
         Redirect(routes.Application.index)
@@ -100,25 +116,36 @@ object GitHubAuthController extends GitHubOAuth2Controller with AuthConfigImpl {
     }
   }
 
-  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
     DB.localTx { implicit session =>
       GitHubUser.findById(providerUser.id) match {
         case None =>
           val id = User.create(providerUser.login, providerUser.avatarUrl).id
           GitHubUser.save(id, providerUser)
           gotoLoginSucceeded(id)
-        case Some(gu) =>
-          gotoLoginSucceeded(gu.userId)
+        case Some(gh) =>
+          gotoLoginSucceeded(gh.userId)
       }
     }
   }
 
+  override def gotoLoginSucceeded(token: AccessToken)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(token)
+      result <- gotoLoginSucceeded(providerUser)
+    } yield result
+  }
+
 }
 
-object TwitterAuthController extends TwitterOAuth10aController with AuthConfigImpl {
+object TwitterAuthController extends TwitterOAuth10aController
+    with AuthConfigImpl
+    with TwitterOAuth10aProviderUserSupport {
 
-  override def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
-    Future.successful {
+  override def gotoLinkSucceeded(accessToken: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(authenticator.consumerKey, accessToken)
+    } yield {
       DB.localTx { implicit session =>
         TwitterUser.save(consumerUser.id, providerUser)
         Redirect(routes.Application.index)
@@ -126,7 +153,7 @@ object TwitterAuthController extends TwitterOAuth10aController with AuthConfigIm
     }
   }
 
-  override def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result] = {
     DB.localTx { implicit session =>
       TwitterUser.findById(providerUser.id) match {
         case None =>
@@ -137,6 +164,13 @@ object TwitterAuthController extends TwitterOAuth10aController with AuthConfigIm
           gotoLoginSucceeded(tu.userId)
       }
     }
+  }
+
+  override def gotoLoginSucceeded(accessToken: AccessToken)(implicit request: RequestHeader): Future[Result] = {
+    for {
+      providerUser <- retrieveProviderUser(authenticator.consumerKey, accessToken)
+      result <- gotoLoginSucceeded(providerUser)
+    } yield result
   }
 
 }
