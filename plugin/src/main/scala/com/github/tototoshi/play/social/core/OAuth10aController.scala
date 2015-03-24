@@ -28,7 +28,7 @@ trait OAuth10aController extends Controller {
             )
           )
         case Left(e) =>
-          Logger.error(e.getMessage)
+          Logger(getClass).error(e.getMessage)
           Future.successful(InternalServerError(e.getMessage))
       }
     }
@@ -45,7 +45,7 @@ trait OAuth10aController extends Controller {
               )
             )
           case Left(e) =>
-            Logger.error(e.getMessage)
+            Logger(getClass).error(e.getMessage)
             Future.successful(InternalServerError(e.getMessage))
         }
       case None =>
@@ -79,7 +79,7 @@ trait OAuth10aController extends Controller {
         } yield {
           for {
             providerUser <- authenticator.retrieveUser(token.token, token.secret)
-            _ = Logger.debug("Retrieve user info from oauth provider: " + providerUser.toString)
+            _ = Logger(getClass).debug("Retrieve user info from oauth provider: " + providerUser.toString)
             result <- action(providerUser)
           } yield {
             result

@@ -43,7 +43,7 @@ class GitHubOAuth2Authenticator extends OAuth2Authenticator {
       .withHeaders(HeaderNames.ACCEPT -> MimeTypes.JSON)
       .post(Results.EmptyContent())
       .map { response =>
-        Logger.debug("Retrieving access token from provider API: " + response.body)
+        Logger(getClass).debug("Retrieving access token from provider API: " + response.body)
         parseAccessTokenResponse(response)
       }
   }
@@ -57,7 +57,7 @@ class GitHubOAuth2Authenticator extends OAuth2Authenticator {
   }
 
   def parseAccessTokenResponse(response: WSResponse): String = {
-    Logger.debug("Parsing access token response: " + response.body)
+    Logger(getClass).debug("Parsing access token response: " + response.body)
     (response.json \ "access_token").as[String]
   }
 

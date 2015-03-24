@@ -44,7 +44,7 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
       .withHeaders(HeaderNames.ACCEPT -> MimeTypes.JSON)
       .post(Results.EmptyContent())
       .map { response =>
-        Logger.debug("Retrieving access token from provider API: " + response.body)
+        Logger(getClass).debug("Retrieving access token from provider API: " + response.body)
         parseAccessTokenResponse(response)
       }
   }
@@ -58,7 +58,7 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
   }
 
   def parseAccessTokenResponse(response: WSResponse): String = {
-    Logger.debug("Parsing access token response: " + response.body)
+    Logger(getClass).debug("Parsing access token response: " + response.body)
     (for {
       params <- response.body.split("&").toList
       key :: value :: Nil = params.split("=").toList
@@ -84,7 +84,7 @@ class FacebookOAuth2Authenticator extends OAuth2Authenticator {
         .withQueryString("access_token" -> accessToken, "fields" -> "name,first_name,last_name,picture.type(large),email")
         .get()
     } yield {
-      Logger.debug("Retrieving user info from provider API: " + response.body)
+      Logger(getClass).debug("Retrieving user info from provider API: " + response.body)
       readProviderUser(accessToken, response)
     }
   }

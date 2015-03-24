@@ -72,11 +72,11 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
         (for {
           token <- authenticator.retrieveAccessToken(code)
           providerUser <- authenticator.retrieveProviderUser(token)
-          _ = Logger.debug("Retrieve user info from oauth provider: " + providerUser.toString)
+          _ = Logger(getClass).debug("Retrieve user info from oauth provider: " + providerUser.toString)
           result <- action(providerUser)
         } yield result).recover {
           case NonFatal(e) =>
-            Logger.error(e.getMessage, e)
+            Logger(getClass).error(e.getMessage, e)
             InternalServerError
         }
     })

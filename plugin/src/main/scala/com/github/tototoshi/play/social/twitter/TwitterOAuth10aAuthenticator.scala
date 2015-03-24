@@ -57,7 +57,7 @@ class TwitterOAuth10aAuthenticator extends OAuth10aAuthenticator {
       response <- WS.url("https://api.twitter.com/1.1/account/verify_credentials.json")
         .sign(OAuthCalculator(consumerKey, RequestToken(accessToken, accessTokenSecret))).get()
     } yield {
-      Logger.debug("Retrieving user info from Twitter API: " + response.body)
+      Logger(getClass).debug("Retrieving user info from Twitter API: " + response.body)
       readProviderUser(accessToken, accessTokenSecret, response)
     }
   }
