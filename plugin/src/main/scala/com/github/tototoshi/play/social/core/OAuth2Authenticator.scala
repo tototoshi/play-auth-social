@@ -1,11 +1,10 @@
 package com.github.tototoshi.play.social.core
 
 import play.api.libs.ws.WSResponse
-import play.api.mvc.{ RequestHeader, Result }
 
 import scala.concurrent.Future
 
-trait OAuth2Authenticator[U] {
+trait OAuth2Authenticator {
 
   type ProviderUser
 
@@ -30,9 +29,5 @@ trait OAuth2Authenticator[U] {
   protected def readProviderUser(accessToken: String, response: WSResponse): ProviderUser
 
   def retrieveProviderUser(accessToken: String): Future[ProviderUser]
-
-  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
-
-  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: U)(implicit request: RequestHeader): Future[Result]
 
 }

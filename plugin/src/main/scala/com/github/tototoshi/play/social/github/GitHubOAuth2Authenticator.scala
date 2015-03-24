@@ -18,7 +18,7 @@ case class GitHubUser(
   avatarUrl: String,
   accessToken: String)
 
-trait GitHubOAuth2Authenticator[U] extends OAuth2Authenticator[U] {
+class GitHubOAuth2Authenticator extends OAuth2Authenticator {
 
   type ProviderUser = GitHubUser
 

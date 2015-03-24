@@ -6,7 +6,7 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-trait OAuth10aAuthenticator[U] {
+trait OAuth10aAuthenticator {
 
   type ProviderUser
 
@@ -32,10 +32,6 @@ trait OAuth10aAuthenticator[U] {
   protected def readProviderUser(accessToken: String, accessTokenSecret: String, response: WSResponse): ProviderUser
 
   def retrieveUser(accessToken: String, accessTokenSecret: String): Future[ProviderUser]
-
-  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
-
-  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: U)(implicit request: RequestHeader): Future[Result]
 
 }
 
