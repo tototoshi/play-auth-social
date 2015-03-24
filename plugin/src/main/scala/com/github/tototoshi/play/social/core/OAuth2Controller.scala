@@ -64,7 +64,7 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
       formWithError => Future.successful(BadRequest)
     }, {
       case (code, _) =>
-        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
+        val action: ProviderUser => Future[Result] = loggedIn match {
           case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
           case None => gotoLoginSucceeded
         }
@@ -82,8 +82,8 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
     })
   }
 
-  def gotoLoginSucceeded(providerUser: authenticator.ProviderUser)(implicit request: RequestHeader): Future[Result]
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
 
-  def gotoLinkSucceeded(providerUser: authenticator.ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
+  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }

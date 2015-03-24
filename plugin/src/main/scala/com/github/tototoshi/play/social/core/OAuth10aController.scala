@@ -1,6 +1,6 @@
 package com.github.tototoshi.play.social.core
 
-import jp.t2v.lab.play2.auth.{ AuthConfig, AuthenticityToken, OptionalAuthElement }
+import jp.t2v.lab.play2.auth.{ AuthConfig, OptionalAuthElement }
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -66,7 +66,7 @@ trait OAuth10aController extends Controller {
       formWithError => Future.successful(BadRequest)
     }, {
       case (Some(oauthToken), Some(oauthVerifier), None) =>
-        val action: authenticator.ProviderUser => Future[Result] = loggedIn match {
+        val action: ProviderUser => Future[Result] = loggedIn match {
           case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
           case None => gotoLoginSucceeded
         }
@@ -92,9 +92,9 @@ trait OAuth10aController extends Controller {
 
   }
 
-  def gotoLoginSucceeded(providerUser: authenticator.ProviderUser)(implicit request: RequestHeader): Future[Result]
+  def gotoLoginSucceeded(providerUser: ProviderUser)(implicit request: RequestHeader): Future[Result]
 
-  def gotoLinkSucceeded(providerUser: authenticator.ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
+  def gotoLinkSucceeded(providerUser: ProviderUser, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }
 
