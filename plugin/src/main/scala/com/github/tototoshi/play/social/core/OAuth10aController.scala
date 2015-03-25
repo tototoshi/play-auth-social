@@ -7,7 +7,6 @@ import play.api.data.Forms._
 import play.api.libs.oauth._
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait OAuth10aController extends Controller with OAuthControllerBase {
@@ -15,7 +14,8 @@ trait OAuth10aController extends Controller with OAuthControllerBase {
 
   val authenticator: OAuth10aAuthenticator
 
-  def login = AsyncStack { implicit request =>
+  def login = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     loggedIn match {
       case Some(_) => loginSucceeded(request)
       case None => authenticator.oauth.retrieveRequestToken(authenticator.callbackURL) match {
@@ -32,7 +32,8 @@ trait OAuth10aController extends Controller with OAuthControllerBase {
     }
   }
 
-  def link = AsyncStack { implicit request =>
+  def link = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     loggedIn match {
       case Some(_) =>
         authenticator.oauth.retrieveRequestToken(authenticator.callbackURL) match {
@@ -51,7 +52,8 @@ trait OAuth10aController extends Controller with OAuthControllerBase {
     }
   }
 
-  def authorize = AsyncStack { implicit request =>
+  def authorize = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     val form = Form(
       tuple(
         "oauth_token" -> optional(nonEmptyText),

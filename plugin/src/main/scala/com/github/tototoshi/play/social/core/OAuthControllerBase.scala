@@ -15,4 +15,6 @@ trait OAuthControllerBase { self: OptionalAuthElement with AuthConfig =>
 
   def gotoOAuthLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader, ctx: ExecutionContext): Future[Result]
 
+  protected lazy val OAuthExecutionContext: ExecutionContext = play.api.libs.concurrent.Execution.defaultContext
+
 }
