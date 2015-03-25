@@ -2,9 +2,7 @@ package com.github.tototoshi.play.social.core
 
 import play.api.libs.oauth._
 
-trait OAuth10aAuthenticator {
-
-  type AccessToken
+trait OAuth10aAuthenticator extends OAuthAuthenticatorBase {
 
   val callbackURL: String
 

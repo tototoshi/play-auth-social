@@ -10,12 +10,10 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait OAuth10aController extends Controller {
+trait OAuth10aController extends Controller with OAuthControllerBase {
   self: OptionalAuthElement with AuthConfig =>
 
   val authenticator: OAuth10aAuthenticator
-
-  type AccessToken = authenticator.AccessToken
 
   def login = AsyncStack { implicit request =>
     loggedIn match {
@@ -67,8 +65,8 @@ trait OAuth10aController extends Controller {
     }, {
       case (Some(oauthToken), Some(oauthVerifier), None) =>
         val action: AccessToken => Future[Result] = loggedIn match {
-          case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
-          case None => gotoLoginSucceeded
+          case Some(consumerUser) => gotoOAuthLinkSucceeded(_, consumerUser)
+          case None => gotoOAuthLoginSucceeded
         }
         (for {
           tokenSecret <- request.session.get("play.social.requestTokenSecret")
@@ -87,10 +85,6 @@ trait OAuth10aController extends Controller {
   }
 
   def requestTokenToAccessToken(requestToken: RequestToken): AccessToken
-
-  def gotoLoginSucceeded(accessToken: AccessToken)(implicit request: RequestHeader): Future[Result]
-
-  def gotoLinkSucceeded(accessToken: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }
 
