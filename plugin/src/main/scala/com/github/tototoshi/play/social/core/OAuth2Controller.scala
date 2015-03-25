@@ -8,7 +8,6 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
@@ -20,7 +19,8 @@ trait OAuth2Controller extends Controller with OAuthControllerBase { self: Optio
 
   // TODO scope is optional in some services
   // TODO some services have more optional parameter
-  def login(scope: String) = AsyncStack { implicit request =>
+  def login(scope: String) = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     loggedIn match {
       case Some(u) =>
         loginSucceeded(request)
@@ -37,7 +37,8 @@ trait OAuth2Controller extends Controller with OAuthControllerBase { self: Optio
 
   // TODO scope is optional in some services
   // TODO some services have more optional parameter
-  def link(scope: String) = AsyncStack { implicit request =>
+  def link(scope: String) = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     loggedIn match {
       case Some(u) =>
         // TODO should it be more random ?
@@ -52,7 +53,8 @@ trait OAuth2Controller extends Controller with OAuthControllerBase { self: Optio
     }
   }
 
-  def authorize = AsyncStack { implicit request =>
+  def authorize = AsyncStack(ExecutionContextKey -> OAuthExecutionContext) { implicit request =>
+    implicit val ec = StackActionExecutionContext
     val form = Form(
       tuple(
         "code" -> nonEmptyText,
