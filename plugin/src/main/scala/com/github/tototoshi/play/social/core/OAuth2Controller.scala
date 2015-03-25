@@ -12,11 +12,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthConfig =>
+trait OAuth2Controller extends Controller with OAuthControllerBase { self: OptionalAuthElement with AuthConfig =>
 
   val authenticator: OAuth2Authenticator
-
-  type AccessToken = authenticator.AccessToken
 
   val OAUTH2_STATE_KEY = "play.auth.social.oauth2.state"
 
@@ -69,8 +67,8 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
     }, {
       case (code, _) =>
         val action: AccessToken => Future[Result] = loggedIn match {
-          case Some(consumerUser) => gotoLinkSucceeded(_, consumerUser)
-          case None => gotoLoginSucceeded
+          case Some(consumerUser) => gotoOAuthLinkSucceeded(_, consumerUser)
+          case None => gotoOAuthLoginSucceeded
         }
 
         (for {
@@ -83,9 +81,5 @@ trait OAuth2Controller extends Controller { self: OptionalAuthElement with AuthC
         }
     })
   }
-
-  def gotoLoginSucceeded(token: AccessToken)(implicit request: RequestHeader): Future[Result]
-
-  def gotoLinkSucceeded(token: AccessToken, consumerUser: User)(implicit request: RequestHeader): Future[Result]
 
 }

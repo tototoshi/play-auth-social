@@ -1,13 +1,12 @@
 package com.github.tototoshi.play.social.facebook.oauth2
 
-import com.github.tototoshi.play.social.core.OAuth2ProviderUserSupport
+import com.github.tototoshi.play.social.core.OAuthProviderUserSupport
 import play.api.Logger
 import play.api.libs.ws.{ WS, WSResponse }
 import play.api.Play.current
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-trait FacebookProviderUserSupport extends OAuth2ProviderUserSupport {
+trait FacebookProviderUserSupport extends OAuthProviderUserSupport {
   self: FacebookController =>
 
   type ProviderUser = FacebookUser
@@ -22,7 +21,7 @@ trait FacebookProviderUserSupport extends OAuth2ProviderUserSupport {
     )
   }
 
-  def retrieveProviderUser(accessToken: AccessToken): Future[ProviderUser] = {
+  def retrieveProviderUser(accessToken: AccessToken)(implicit ctx: ExecutionContext): Future[ProviderUser] = {
     for {
       response <- WS.url("https://graph.facebook.com/me")
         .withQueryString("access_token" -> accessToken, "fields" -> "name,first_name,last_name,picture.type(large),email")

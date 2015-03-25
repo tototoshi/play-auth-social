@@ -9,8 +9,7 @@ import play.api.libs.ws.{ WS, WSResponse }
 import play.api.Play.current
 import play.api.mvc.Results
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
 class SlackAuthenticator extends OAuth2Authenticator {
@@ -37,7 +36,7 @@ class SlackAuthenticator extends OAuth2Authenticator {
     s"${authorizationUrl}?client_id=${encodedClientId}&redirect_uri=${encodedRedirectUri}&scope=${encodedScope}&state=${encodedState}"
   }
 
-  override def retrieveAccessToken(code: String): Future[AccessToken] = {
+  override def retrieveAccessToken(code: String)(implicit ctx: ExecutionContext): Future[AccessToken] = {
     WS.url(accessTokenUrl)
       .withQueryString(
         "client_id" -> clientId,

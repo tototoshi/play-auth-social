@@ -9,8 +9,7 @@ import play.api.http.{ HeaderNames, MimeTypes }
 import play.api.libs.ws.{ WS, WSResponse }
 import play.api.mvc.Results
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
 class GitHubAuthenticator extends OAuth2Authenticator {
@@ -29,7 +28,7 @@ class GitHubAuthenticator extends OAuth2Authenticator {
 
   lazy val callbackUrl = current.configuration.getString("github.callbackURL").getOrElse(sys.error("github.callbackURL is missing"))
 
-  def retrieveAccessToken(code: String): Future[AccessToken] = {
+  def retrieveAccessToken(code: String)(implicit ctx: ExecutionContext): Future[AccessToken] = {
     WS.url(accessTokenUrl)
       .withQueryString(
         "client_id" -> clientId,

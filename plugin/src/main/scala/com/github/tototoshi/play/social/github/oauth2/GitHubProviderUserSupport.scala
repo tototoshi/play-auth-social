@@ -1,13 +1,12 @@
 package com.github.tototoshi.play.social.github.oauth2
 
-import com.github.tototoshi.play.social.core.OAuth2ProviderUserSupport
+import com.github.tototoshi.play.social.core.OAuthProviderUserSupport
 import play.api.Play.current
 import play.api.libs.ws.{ WS, WSResponse }
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-trait GitHubProviderUserSupport extends OAuth2ProviderUserSupport {
+trait GitHubProviderUserSupport extends OAuthProviderUserSupport {
   self: GitHubController =>
 
   type ProviderUser = GitHubUser
@@ -22,7 +21,7 @@ trait GitHubProviderUserSupport extends OAuth2ProviderUserSupport {
     )
   }
 
-  def retrieveProviderUser(accessToken: String): Future[ProviderUser] = {
+  def retrieveProviderUser(accessToken: String)(implicit ctx: ExecutionContext): Future[ProviderUser] = {
     for {
       response <- WS.url("https://api.github.com/user").withHeaders("Authorization" -> s"token ${accessToken}").get()
     } yield {

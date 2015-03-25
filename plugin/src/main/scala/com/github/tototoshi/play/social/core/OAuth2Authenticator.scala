@@ -2,11 +2,9 @@ package com.github.tototoshi.play.social.core
 
 import play.api.libs.ws.WSResponse
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-trait OAuth2Authenticator {
-
-  type AccessToken
+trait OAuth2Authenticator extends OAuthAuthenticatorBase {
 
   val providerName: String
 
@@ -20,7 +18,7 @@ trait OAuth2Authenticator {
 
   val clientSecret: String
 
-  def retrieveAccessToken(code: String): Future[AccessToken]
+  def retrieveAccessToken(code: String)(implicit ctx: ExecutionContext): Future[AccessToken]
 
   def getAuthorizationUrl(scope: String, state: String): String
 
