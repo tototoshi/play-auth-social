@@ -16,6 +16,7 @@ trait FacebookProviderUserSupport extends OAuthProviderUserSupport {
     FacebookUser(
       (j \ "id").as[String],
       (j \ "name").as[String],
+      (j \ "email").as[String],
       (j \ "picture" \ "data" \ "url").as[String],
       accessToken
     )
